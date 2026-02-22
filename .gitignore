@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# TLS Certificates (keep .gitkeep)
+certs/*.pem
+certs/*.crt
+certs/*.key
+
+# Video files (too large for git)
+freeswitch/videos/*.mp4
+freeswitch/videos/*.webm
+freeswitch/videos/*.mkv
+
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,34 @@
+<include>
+  <context name="public">
+    
+    <!-- Video Demo Extension -->
+    <extension name="video_demo">
+      <condition field="destination_number" expression="^1000$">
+        <action application="answer"/>
+        <action application="sleep" data="500"/>
+        
+        <!-- Enable video -->
+        <action application="set" data="absolute_codec_string=^^:VP8:H264:PCMU:PCMA"/>
+        
+        <!-- Play intro video -->
+        <action application="playback" data="/videos/intro.mp4"/>
+        
+        <!-- Fallback message if video fails -->
+        <action application="speak" data="flite|kal|Thanks for calling. The video demo is currently unavailable."/>
+        
+        <action application="hangup"/>
+      </condition>
+    </extension>
+    
+    <!-- Catch-all for any other number - play message -->
+    <extension name="catch_all">
+      <condition field="destination_number" expression="^(.*)$">
+        <action application="answer"/>
+        <action application="sleep" data="500"/>
+        <action application="speak" data="flite|kal|Welcome to Nick's VoIP demo. Call extension 1000 for the video introduction."/>
+        <action application="hangup"/>
+      </condition>
+    </extension>
+    
+  </context>
+</include>

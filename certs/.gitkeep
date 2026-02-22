@@ -1,0 +1,3 @@
+# TLS certificates will be mounted here
+# Run certbot to generate Let's Encrypt certs:
+# certbot certonly --standalone -d your-domain.com
