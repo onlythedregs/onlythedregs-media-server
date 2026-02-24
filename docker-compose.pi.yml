@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   opensips:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/opensips:latest
     build: 
       context: ./opensips
       dockerfile: Dockerfile
@@ -29,6 +30,7 @@ services:
       - sipnet
 
   rtpengine:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/rtpengine:latest
     build: 
       context: ./rtpengine
       dockerfile: Dockerfile
@@ -49,6 +51,7 @@ services:
           memory: 256M
 
   freeswitch:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/freeswitch:latest
     build: 
       context: ./freeswitch
       dockerfile: Dockerfile

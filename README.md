@@ -48,9 +48,19 @@ Recommended format:
 
 ### 4. Start Services
 
+**Option A: Use Pre-built Images (Recommended for Pi)**
 ```bash
 docker-compose up -d
+# Images are automatically pulled from GitHub Container Registry
 ```
+
+**Option B: Build Locally**
+```bash
+docker-compose build
+docker-compose up -d
+```
+
+> **Note**: Pre-built multi-architecture images are automatically built and published via GitHub Actions when code is pushed to main. This makes Pi deployments much faster (~30 seconds vs 10+ minutes).
 
 ### 5. Verify
 

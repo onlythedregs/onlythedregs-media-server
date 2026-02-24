@@ -71,8 +71,22 @@ if [[ -f "docker-compose.pi.yml" ]]; then
     fi
 fi
 
-echo "📦 Building containers..."
-docker compose -f $COMPOSE_FILE build --parallel
+# Choose build strategy
+echo "🏗️  Image build strategy:"
+echo "   1) Use pre-built images from registry (fast, ~30 seconds)"
+echo "   2) Build locally (slow but customizable, ~10 minutes)"
+read -p "Choose option (1): " -n 1 -r
+echo
+
+BUILD_LOCALLY=false
+if [[ $REPLY =~ ^[2]$ ]]; then
+    BUILD_LOCALLY=true
+    echo "📦 Building containers locally..."
+    docker compose -f $COMPOSE_FILE build --parallel
+else
+    echo "📦 Pulling pre-built images..."
+    docker compose -f $COMPOSE_FILE pull
+fi
 
 echo "🚀 Starting services..."
 docker compose -f $COMPOSE_FILE up -d

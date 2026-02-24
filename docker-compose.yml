@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   opensips:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/opensips:latest
     build: ./opensips
     container_name: opensips
     restart: unless-stopped
@@ -20,6 +21,7 @@ services:
       - sipnet
 
   rtpengine:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/rtpengine:latest
     build: ./rtpengine
     container_name: rtpengine
     restart: unless-stopped
@@ -32,6 +34,7 @@ services:
       - ./certs:/etc/rtpengine/certs:ro
 
   freeswitch:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/freeswitch:latest
     build: ./freeswitch
     container_name: freeswitch
     restart: unless-stopped
