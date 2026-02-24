@@ -1,21 +1,24 @@
-# Multi-architecture RTPEngine build
-FROM debian:bookworm-slim
+# Multi-architecture RTPEngine build using Ubuntu 24.04 LTS
+FROM ubuntu:24.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    gnupg2 \
     wget \
+    gnupg2 \
     ca-certificates \
-    lsb-release \
     gettext-base \
     curl \
+    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
-# Add RTPEngine repository (supports multiple architectures)
-RUN wget -qO - https://dfx.at/rtpengine/gpg.asc | apt-key add - \
-    && echo "deb https://dfx.at/rtpengine/debian $(lsb_release -sc) main" > /etc/apt/sources.list.d/rtpengine.list
+# Add RTPEngine repository for Ubuntu 24.04  
+RUN wget -qO - https://dfx.at/rtpengine/gpg.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/rtpengine.gpg \
+    && echo "deb https://dfx.at/rtpengine/ubuntu noble main" > /etc/apt/sources.list.d/rtpengine.list
 
-# Install RTPEngine 
+# Install RTPEngine
 RUN apt-get update && apt-get install -y \
     rtpengine \
     && rm -rf /var/lib/apt/lists/*

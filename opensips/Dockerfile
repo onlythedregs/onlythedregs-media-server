@@ -1,18 +1,20 @@
-# Multi-architecture OpenSIPS build
-FROM debian:bookworm-slim
+# Multi-architecture OpenSIPS build using Ubuntu 24.04 LTS
+FROM ubuntu:24.04
 
-# Install dependencies
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies and OpenSIPS
 RUN apt-get update && apt-get install -y \
-    gnupg2 \
     wget \
+    gnupg2 \
     ca-certificates \
-    lsb-release \
     gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
-# Add OpenSIPS repository (supports multiple architectures)
-RUN wget -qO - https://apt.opensips.org/opensips-org.gpg | apt-key add - \
-    && echo "deb https://apt.opensips.org bookworm 3.4-releases" > /etc/apt/sources.list.d/opensips.list
+# Add OpenSIPS repository for Ubuntu 24.04
+RUN wget -qO - https://apt.opensips.org/opensips-org.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/opensips.gpg \
+    && echo "deb https://apt.opensips.org noble 3.4-releases" > /etc/apt/sources.list.d/opensips.list
 
 # Install OpenSIPS with required modules
 RUN apt-get update && apt-get install -y \
@@ -20,8 +22,6 @@ RUN apt-get update && apt-get install -y \
     opensips-tls-module \
     opensips-wss-module \
     opensips-rtpengine-module \
-    opensips-db-sqlite-module \
-    opensips-sqlite-module \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy configuration

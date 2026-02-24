@@ -1,5 +1,8 @@
 # FreeSwitch with video support for ARM64/x86_64
-FROM debian:bookworm-slim
+FROM ubuntu:24.04
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -9,9 +12,9 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Add FreeSWITCH repository
-RUN wget -qO - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc | apt-key add - \
-    && echo "deb http://files.freeswitch.org/repo/deb/debian-release/ bookworm main" > /etc/apt/sources.list.d/freeswitch.list
+# Add FreeSWITCH repository for Ubuntu 24.04
+RUN wget -qO - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/freeswitch.gpg \
+    && echo "deb http://files.freeswitch.org/repo/deb/debian-release/ noble main" > /etc/apt/sources.list.d/freeswitch.list
 
 # Install FreeSWITCH with video support
 RUN apt-get update && apt-get install -y \
