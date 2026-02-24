@@ -72,10 +72,10 @@ if [[ -f "docker-compose.pi.yml" ]]; then
 fi
 
 echo "📦 Building containers..."
-docker-compose -f $COMPOSE_FILE build --parallel
+docker compose -f $COMPOSE_FILE build --parallel
 
 echo "🚀 Starting services..."
-docker-compose -f $COMPOSE_FILE up -d
+docker compose -f $COMPOSE_FILE up -d
 
 # Wait for services to start
 echo "⏳ Waiting for services to start..."
@@ -83,7 +83,7 @@ sleep 10
 
 # Check service status
 echo "🔍 Checking service status..."
-docker-compose -f $COMPOSE_FILE ps
+docker compose -f $COMPOSE_FILE ps
 
 # Test connectivity
 echo "🧪 Testing connectivity..."
@@ -98,9 +98,9 @@ echo ""
 echo "🎉 Deployment complete!"
 echo ""
 echo "📊 Useful commands:"
-echo "   View logs:     docker-compose -f $COMPOSE_FILE logs -f"
-echo "   Stop services: docker-compose -f $COMPOSE_FILE down"
-echo "   Service status: docker-compose -f $COMPOSE_FILE ps"
+echo "   View logs:     docker compose -f $COMPOSE_FILE logs -f"
+echo "   Stop services: docker compose -f $COMPOSE_FILE down"
+echo "   Service status: docker compose -f $COMPOSE_FILE ps"
 echo "   Resource usage: docker stats"
 echo ""
 echo "🔗 Access your media server:"
