@@ -27,6 +27,7 @@ services:
     network_mode: host
     environment:
       - PUBLIC_IP=${PUBLIC_IP}
+      - INTERNAL_IP=${INTERNAL_IP:-auto}
     volumes:
       - ./certs:/etc/rtpengine/certs:ro
 

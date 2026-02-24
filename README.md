@@ -121,6 +121,22 @@ docker-compose logs -f opensips
    docker compose up -d
    ```
 
+## Raspberry Pi Deployment
+
+For deployment on Raspberry Pi with port forwarding and NAT traversal:
+
+**📋 See [PI_DEPLOYMENT.md](PI_DEPLOYMENT.md) for complete Pi setup guide**
+
+Quick start:
+```bash
+# Configure environment
+nano .env  # Set your PUBLIC_IP and INTERNAL_IP
+
+# Run automated setup
+chmod +x deploy-pi.sh
+./deploy-pi.sh
+```
+
 ## Troubleshooting
 
 ### No audio/video
