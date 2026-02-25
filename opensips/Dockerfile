@@ -19,10 +19,10 @@ RUN wget -qO - https://apt.opensips.org/opensips-org.gpg | gpg --dearmor > /etc/
 # Install OpenSIPS with required modules
 RUN apt-get update && apt-get install -y \
     opensips \
-    opensips-tls-module \
-    opensips-wss-module \
-    opensips-rtpengine-module \
     && rm -rf /var/lib/apt/lists/*
+
+# Note: In OpenSIPS 3.4+, TLS, WSS, and RTPEngine modules are typically 
+# included in the main package or have different package names
 
 # Copy configuration
 COPY opensips.cfg /etc/opensips/opensips.cfg

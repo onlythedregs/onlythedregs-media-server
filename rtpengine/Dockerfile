@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y \
     rtpengine \
     && rm -rf /var/lib/apt/lists/*
 
+# Note: Modern RTPEngine packages typically include all required components
+
 # Copy configuration
 COPY rtpengine.conf /etc/rtpengine/rtpengine.conf
 COPY entrypoint.sh /entrypoint.sh
