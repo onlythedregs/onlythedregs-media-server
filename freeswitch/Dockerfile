@@ -12,9 +12,9 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Add FreeSWITCH repository for Ubuntu 24.04
+# Add FreeSWITCH repository - use jammy packages on noble (compatibility)
 RUN wget -qO - https://files.freeswitch.org/repo/deb/debian-release/fsstretch-archive-keyring.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/freeswitch.gpg \
-    && echo "deb http://files.freeswitch.org/repo/deb/debian-release/ noble main" > /etc/apt/sources.list.d/freeswitch.list
+    && echo "deb http://files.freeswitch.org/repo/deb/debian-release/ jammy main" > /etc/apt/sources.list.d/freeswitch.list
 
 # Install FreeSWITCH with video support
 RUN apt-get update && apt-get install -y \
