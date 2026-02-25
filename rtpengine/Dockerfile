@@ -1,5 +1,5 @@
-# RTPEngine using jambonz official Docker image
-FROM jambonz/rtpengine:latest
+# RTPEngine using audiocodes official Docker image
+FROM audiocodes/rtpengine:latest
 
 # Install gettext for environment variable substitution
 USER root
