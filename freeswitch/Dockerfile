@@ -1,8 +1,9 @@
 # FreeSWITCH using SignalWire's official multi-arch image
 FROM signalwire/freeswitch-public-base:bookworm
 
-# Install gettext for environment variable substitution
-RUN apt-get update && apt-get install -y \
+# Remove SignalWire repo (requires auth) and install gettext from Debian repos
+RUN rm -f /etc/apt/sources.list.d/freeswitch*.list /etc/apt/sources.list.d/signalwire*.list 2>/dev/null || true \
+    && apt-get update && apt-get install -y \
     gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
