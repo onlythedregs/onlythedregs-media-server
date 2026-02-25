@@ -1,28 +1,11 @@
-# Multi-architecture OpenSIPS build using Ubuntu 24.04 LTS
-FROM ubuntu:24.04
+# OpenSIPS using official Docker image
+FROM opensips/opensips:3.4
 
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install dependencies and OpenSIPS
+# Install gettext for environment variable substitution
+USER root
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg2 \
-    ca-certificates \
     gettext-base \
     && rm -rf /var/lib/apt/lists/*
-
-# Add OpenSIPS repository for Ubuntu 24.04
-RUN wget -qO - https://apt.opensips.org/opensips-org.gpg | gpg --dearmor > /etc/apt/trusted.gpg.d/opensips.gpg \
-    && echo "deb https://apt.opensips.org noble 3.4-releases" > /etc/apt/sources.list.d/opensips.list
-
-# Install OpenSIPS with required modules
-RUN apt-get update && apt-get install -y \
-    opensips \
-    && rm -rf /var/lib/apt/lists/*
-
-# Note: In OpenSIPS 3.4+, TLS, WSS, and RTPEngine modules are typically 
-# included in the main package or have different package names
 
 # Copy configuration
 COPY opensips.cfg /etc/opensips/opensips.cfg
