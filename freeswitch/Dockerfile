@@ -43,6 +43,13 @@ RUN git clone https://github.com/freeswitch/spandsp.git /usr/src/spandsp \
     && make -j$(nproc) \
     && make install
 
+# Build libks from source (required by mod_verto in FreeSWITCH 1.10.x)
+RUN git clone https://github.com/signalwire/libks.git /usr/src/libks \
+    && cd /usr/src/libks \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local \
+    && make -j$(nproc) \
+    && make install
+
 # Clone FreeSWITCH source via git (bootstrap.sh requires git history)
 RUN git clone --depth=1 --branch v1.10.11 https://github.com/signalwire/freeswitch.git /usr/src/freeswitch
 
@@ -52,7 +59,7 @@ WORKDIR /usr/src/freeswitch
 RUN which libtool && libtool --version
 RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===" && cat /tmp/bootstrap.log && exit 1)
 
-RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
+RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
     --with-openssl \
     --disable-debug
@@ -93,6 +100,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /usr/local/freeswitch /usr/local/freeswitch
 COPY --from=builder /usr/local/lib/libsofia* /usr/local/lib/
 COPY --from=builder /usr/local/lib/libspandsp* /usr/local/lib/
+COPY --from=builder /usr/local/lib/libks* /usr/local/lib/
 
 RUN ldconfig
 
