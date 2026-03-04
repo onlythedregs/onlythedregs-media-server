@@ -64,7 +64,9 @@ RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
     --with-openssl \
-    --disable-debug
+    --disable-debug \
+    > /tmp/configure.log 2>&1 \
+    || (echo "=== CONFIGURE FAILED ===" && tail -150 /tmp/configure.log && exit 1)
 
 RUN make -j$(nproc) && make install
 
