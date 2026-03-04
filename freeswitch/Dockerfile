@@ -49,6 +49,8 @@ RUN git clone https://github.com/signalwire/libks.git /usr/src/libks \
     && cmake . -DCMAKE_INSTALL_PREFIX=/usr/local \
     && make -j$(nproc) \
     && make install
+# cmake may install to lib64 on some arches; copy to lib so configure/ldconfig finds it
+RUN find /usr/local/lib64 -name 'libks*' -exec cp {} /usr/local/lib/ \; 2>/dev/null || true
 
 # Clone FreeSWITCH source via git (bootstrap.sh requires git history)
 RUN git clone --depth=1 --branch v1.10.11 https://github.com/signalwire/freeswitch.git /usr/src/freeswitch
