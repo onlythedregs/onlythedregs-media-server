@@ -1,10 +1,13 @@
-# FreeSWITCH using Debian bookworm official packages (multi-arch: ARM64/AMD64)
-FROM debian:bookworm-slim
+# FreeSWITCH using Ubuntu 22.04 universe repository (multi-arch: ARM64/AMD64)
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install FreeSWITCH directly from Debian's official repos - no external repo needed
+# Enable universe repository and install FreeSWITCH
 RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository universe \
+    && apt-get update && apt-get install -y \
     freeswitch \
     freeswitch-mod-commands \
     freeswitch-mod-console \
