@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     build-essential cmake git wget curl pkg-config \
     libtool libtool-bin autoconf automake bash \
     software-properties-common ca-certificates gnupg \
+    gettext autopoint gawk \
     yasm nasm
 
 # Core dependencies
@@ -44,7 +45,7 @@ RUN git clone --depth=1 --branch v1.10.11 https://github.com/signalwire/freeswit
 
 WORKDIR /usr/src/freeswitch
 
-RUN ./bootstrap.sh -j
+RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===" && cat /tmp/bootstrap.log && exit 1)
 
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
