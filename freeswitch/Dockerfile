@@ -23,8 +23,9 @@ RUN apt-get install -y \
     libspeex-dev libspeexdsp-dev libldns-dev \
     uuid-dev libpq-dev libopus-dev libsndfile1-dev \
     libavformat-dev libavcodec-dev libavutil-dev libswscale-dev \
-    libjpeg-dev libtiff-dev libedit-dev liblua5.3-dev \
+    libjpeg-dev libtiff-dev libpng-dev libedit-dev liblua5.3-dev \
     libswresample-dev libvpx-dev \
+    libflite-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Build sofia-sip from source (Debian/Ubuntu packages often too old)
@@ -96,6 +97,8 @@ RUN apt-get update && apt-get install -y \
     libvpx7 \
     libspeex1 \
     libspeexdsp1 \
+    libpng16-16 \
+    libflite1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy FreeSWITCH and its dependencies from builder
