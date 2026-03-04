@@ -1,124 +1,99 @@
 # FreeSWITCH built from source - multi-arch (ARM64/AMD64)
-# Stage 1: Build
-FROM debian:bookworm AS builder
+# Based on: https://medium.com/@er.anil.ec/installing-freeswitch-from-source-using-docker-and-docker-compose-ed2cc4fa992e
+FROM ubuntu:22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig
+ENV PATH="/usr/local/freeswitch/bin:$PATH"
 
-# Install build dependencies
+# Base build tools
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    cmake \
-    automake \
-    autoconf \
-    libtool \
-    pkg-config \
-    git \
-    wget \
-    curl \
-    gnupg2 \
-    libssl-dev \
-    libcurl4-openssl-dev \
-    libpcre3-dev \
-    libsqlite3-dev \
-    libedit-dev \
-    libsndfile1-dev \
-    libopus-dev \
-    libogg-dev \
-    libvorbis-dev \
-    libspeex-dev \
-    libspeexdsp-dev \
-    libjpeg-dev \
-    libldns-dev \
-    zlib1g-dev \
-    libspandsp-dev \
-    libsofia-sip-ua-dev \
-    libgsm1-dev \
-    libtiff-dev \
-    uuid-dev \
-    libxmlrpc-core-c3-dev \
-    libyaml-dev \
-    libmemcached-dev \
-    libhiredis-dev \
-    python3-dev \
+    build-essential cmake git wget curl pkg-config \
+    libtool libtool-bin autoconf automake bash \
+    software-properties-common ca-certificates gnupg \
+    yasm nasm
+
+# Core dependencies
+RUN apt-get install -y \
+    libssl-dev libsqlite3-dev libcurl4-openssl-dev libpcre2-dev \
+    libspeex-dev libspeexdsp-dev libldns-dev \
+    uuid-dev libpq-dev libopus-dev libsndfile1-dev \
+    libavformat-dev libavcodec-dev libavutil-dev libswscale-dev \
+    libjpeg-dev libtiff-dev libedit-dev liblua5.3-dev \
+    libswresample-dev libvpx-dev libavresample-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install libks (SignalWire's required library for FreeSWITCH 1.10.x)
-RUN git clone https://github.com/signalwire/libks.git /usr/src/libks \
-    && cd /usr/src/libks \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+# Build sofia-sip from source (Debian/Ubuntu packages often too old)
+RUN git clone https://github.com/freeswitch/sofia-sip.git /usr/src/sofia-sip \
+    && cd /usr/src/sofia-sip \
+    && ./bootstrap.sh \
+    && ./configure --prefix=/usr/local \
     && make -j$(nproc) \
     && make install
 
-# Install signalwire-c (another SignalWire dependency)
-RUN git clone https://github.com/signalwire/signalwire-c.git /usr/src/signalwire-c \
-    && cd /usr/src/signalwire-c \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+# Build spandsp from source
+RUN git clone https://github.com/freeswitch/spandsp.git /usr/src/spandsp \
+    && cd /usr/src/spandsp \
+    && ./bootstrap.sh \
+    && ./configure --prefix=/usr/local \
     && make -j$(nproc) \
     && make install
 
-# Download FreeSWITCH source
-WORKDIR /usr/src
-RUN wget -q https://github.com/signalwire/freeswitch/archive/refs/tags/v1.10.11.tar.gz \
-    && tar -xzf v1.10.11.tar.gz \
-    && mv freeswitch-1.10.11 freeswitch \
-    && rm v1.10.11.tar.gz
+# Clone FreeSWITCH source via git (bootstrap.sh requires git history)
+RUN git clone --depth=1 --branch v1.10.11 https://github.com/signalwire/freeswitch.git /usr/src/freeswitch
 
 WORKDIR /usr/src/freeswitch
 
-# Bootstrap
 RUN ./bootstrap.sh -j
 
-# Configure - disable av/video modules to avoid ffmpeg ARM issues
-RUN CFLAGS="-O2" ./configure \
-    --prefix=/usr \
-    --sysconfdir=/etc/freeswitch \
-    --localstatedir=/var \
+RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CFLAGS="-O2" ./configure \
+    --prefix=/usr/local/freeswitch \
     --with-openssl \
-    --disable-debug \
-    --disable-mod_av \
-    --disable-mod_ffmpeg \
-    2>&1 | tee /tmp/configure.log || (cat /tmp/configure.log && exit 1)
+    --disable-debug
 
-# Build and install into staging directory
-RUN make -j$(nproc) && make DESTDIR=/staging install
+RUN make -j$(nproc) && make install
 
 # ---
 
 # Stage 2: Runtime
-FROM debian:bookworm-slim
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/usr/local/freeswitch/bin:$PATH"
 
-# Install only runtime dependencies
 RUN apt-get update && apt-get install -y \
     libssl3 \
     libcurl4 \
-    libpcre3 \
+    libpcre2-8-0 \
     libsqlite3-0 \
     libedit2 \
+    liblua5.3-0 \
     libsndfile1 \
     libopus0 \
-    libogg0 \
-    libvorbis0a \
-    libspeex1 \
-    libspeexdsp1 \
-    libspandsp2 \
-    libsofia-sip-ua0 \
-    libgsm1 \
-    libtiff6 \
+    libjpeg8 \
+    libtiff5 \
     uuid-runtime \
     gettext-base \
+    libavformat58 \
+    libavcodec58 \
+    libavutil56 \
+    libswscale5 \
+    libvpx7 \
+    libspeex1 \
+    libspeexdsp1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy built FreeSWITCH from builder stage
-COPY --from=builder /staging /
-COPY --from=builder /usr/lib/libks* /usr/lib/
-COPY --from=builder /usr/lib/libsignalwire* /usr/lib/
+# Copy FreeSWITCH and its dependencies from builder
+COPY --from=builder /usr/local/freeswitch /usr/local/freeswitch
+COPY --from=builder /usr/local/lib/libsofia* /usr/local/lib/
+COPY --from=builder /usr/local/lib/libspandsp* /usr/local/lib/
+
+RUN ldconfig
 
 # Copy configuration files
-COPY sip_profiles/ /etc/freeswitch/sip_profiles/
-COPY dialplan/ /etc/freeswitch/dialplan/
-COPY autoload_configs/ /etc/freeswitch/autoload_configs/
+COPY sip_profiles/ /usr/local/freeswitch/conf/sip_profiles/
+COPY dialplan/ /usr/local/freeswitch/conf/dialplan/
+COPY autoload_configs/ /usr/local/freeswitch/conf/autoload_configs/
 
 RUN mkdir -p /videos
 
