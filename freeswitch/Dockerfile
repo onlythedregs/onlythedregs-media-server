@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
 
 # Core dependencies
 RUN apt-get install -y \
-    libssl-dev libsqlite3-dev libcurl4-openssl-dev libpcre2-dev \
+    libssl-dev libsqlite3-dev libcurl4-openssl-dev \
+    libpcre3-dev \
     libspeex-dev libspeexdsp-dev libldns-dev \
     uuid-dev libpq-dev libopus-dev libsndfile1-dev \
     libavformat-dev libavcodec-dev libavutil-dev libswscale-dev \
@@ -51,7 +52,7 @@ WORKDIR /usr/src/freeswitch
 RUN which libtool && libtool --version
 RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===" && cat /tmp/bootstrap.log && exit 1)
 
-RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CFLAGS="-O2" ./configure \
+RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
     --with-openssl \
     --disable-debug
@@ -69,7 +70,7 @@ ENV PATH="/usr/local/freeswitch/bin:$PATH"
 RUN apt-get update && apt-get install -y \
     libssl3 \
     libcurl4 \
-    libpcre2-8-0 \
+    libpcre3 \
     libsqlite3-0 \
     libedit2 \
     liblua5.3-0 \
@@ -104,7 +105,5 @@ RUN mkdir -p /videos
 
 EXPOSE 5060/udp
 EXPOSE 5060/tcp
-
-CMD ["freeswitch", "-nonat", "-nc"]
 
 CMD ["freeswitch", "-nonat", "-nc"]
