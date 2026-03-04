@@ -12,7 +12,9 @@ RUN apt-get update && apt-get install -y \
     libtool libtool-bin autoconf automake bash \
     software-properties-common ca-certificates gnupg \
     gettext autopoint gawk \
-    yasm nasm
+    yasm nasm \
+    && ln -sf /usr/bin/libtool /usr/local/bin/libtool \
+    && ln -sf /usr/bin/libtoolize /usr/local/bin/libtoolize
 
 # Core dependencies
 RUN apt-get install -y \
@@ -45,6 +47,8 @@ RUN git clone --depth=1 --branch v1.10.11 https://github.com/signalwire/freeswit
 
 WORKDIR /usr/src/freeswitch
 
+# Verify libtool is visible before bootstrap
+RUN which libtool && libtool --version
 RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===" && cat /tmp/bootstrap.log && exit 1)
 
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig CFLAGS="-O2" ./configure \
