@@ -14,12 +14,13 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     git \
     wget \
+    curl \
+    gnupg2 \
     libssl-dev \
     libcurl4-openssl-dev \
     libpcre3-dev \
     libsqlite3-dev \
     libedit-dev \
-    liblua5.2-dev \
     libsndfile1-dev \
     libopus-dev \
     libogg-dev \
@@ -27,11 +28,6 @@ RUN apt-get update && apt-get install -y \
     libspeex-dev \
     libspeexdsp-dev \
     libjpeg-dev \
-    libavformat-dev \
-    libavcodec-dev \
-    libavutil-dev \
-    libswscale-dev \
-    libswresample-dev \
     libldns-dev \
     zlib1g-dev \
     libspandsp-dev \
@@ -39,7 +35,26 @@ RUN apt-get update && apt-get install -y \
     libgsm1-dev \
     libtiff-dev \
     uuid-dev \
+    libxmlrpc-core-c3-dev \
+    libyaml-dev \
+    libmemcached-dev \
+    libhiredis-dev \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install libks (SignalWire's required library for FreeSWITCH 1.10.x)
+RUN git clone https://github.com/signalwire/libks.git /usr/src/libks \
+    && cd /usr/src/libks \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+    && make -j$(nproc) \
+    && make install
+
+# Install signalwire-c (another SignalWire dependency)
+RUN git clone https://github.com/signalwire/signalwire-c.git /usr/src/signalwire-c \
+    && cd /usr/src/signalwire-c \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr \
+    && make -j$(nproc) \
+    && make install
 
 # Download FreeSWITCH source
 WORKDIR /usr/src
@@ -50,16 +65,19 @@ RUN wget -q https://github.com/signalwire/freeswitch/archive/refs/tags/v1.10.11.
 
 WORKDIR /usr/src/freeswitch
 
-# Bootstrap and configure
+# Bootstrap
 RUN ./bootstrap.sh -j
 
-RUN ./configure \
+# Configure - disable av/video modules to avoid ffmpeg ARM issues
+RUN CFLAGS="-O2" ./configure \
     --prefix=/usr \
     --sysconfdir=/etc/freeswitch \
     --localstatedir=/var \
     --with-openssl \
     --disable-debug \
-    CFLAGS="-O2"
+    --disable-mod_av \
+    --disable-mod_ffmpeg \
+    2>&1 | tee /tmp/configure.log || (cat /tmp/configure.log && exit 1)
 
 # Build and install into staging directory
 RUN make -j$(nproc) && make DESTDIR=/staging install
@@ -78,7 +96,6 @@ RUN apt-get update && apt-get install -y \
     libpcre3 \
     libsqlite3-0 \
     libedit2 \
-    liblua5.2-0 \
     libsndfile1 \
     libopus0 \
     libogg0 \
@@ -95,6 +112,8 @@ RUN apt-get update && apt-get install -y \
 
 # Copy built FreeSWITCH from builder stage
 COPY --from=builder /staging /
+COPY --from=builder /usr/lib/libks* /usr/lib/
+COPY --from=builder /usr/lib/libsignalwire* /usr/lib/
 
 # Copy configuration files
 COPY sip_profiles/ /etc/freeswitch/sip_profiles/
