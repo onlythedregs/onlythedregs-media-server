@@ -61,12 +61,14 @@ WORKDIR /usr/src/freeswitch
 RUN which libtool && libtool --version
 RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===" && cat /tmp/bootstrap.log && exit 1)
 
+# Disable modules we don't need / don't have deps for
+RUN sed -i 's|^applications/mod_signalwire|#applications/mod_signalwire|' modules.conf \
+    && grep -E 'signalwire|flite|soundtouch|mongo|memcache' modules.conf || true
+
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
     --with-openssl \
-    --disable-debug \
-    > /tmp/configure.log 2>&1 \
-    || (echo "=== CONFIGURE FAILED ===" && tail -150 /tmp/configure.log && exit 1)
+    --disable-debug
 
 RUN make -j$(nproc) && make install
 
