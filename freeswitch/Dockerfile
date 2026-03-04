@@ -1,9 +1,21 @@
-# FreeSWITCH using SignalWire's official multi-arch image
-FROM signalwire/freeswitch-public-base:bookworm
+# FreeSWITCH using Debian bookworm official packages (multi-arch: ARM64/AMD64)
+FROM debian:bookworm-slim
 
-# Remove SignalWire repo (requires auth) and install gettext from Debian repos
-RUN rm -f /etc/apt/sources.list.d/freeswitch*.list /etc/apt/sources.list.d/signalwire*.list 2>/dev/null || true \
-    && apt-get update && apt-get install -y \
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install FreeSWITCH directly from Debian's official repos - no external repo needed
+RUN apt-get update && apt-get install -y \
+    freeswitch \
+    freeswitch-mod-commands \
+    freeswitch-mod-console \
+    freeswitch-mod-logfile \
+    freeswitch-mod-sofia \
+    freeswitch-mod-dialplan-xml \
+    freeswitch-mod-dptools \
+    freeswitch-mod-sndfile \
+    freeswitch-mod-tone-stream \
+    freeswitch-mod-g711 \
+    freeswitch-mod-opus \
     gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
