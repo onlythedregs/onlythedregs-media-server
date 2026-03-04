@@ -24,9 +24,6 @@
     <load module="mod_av"/>
     <load module="mod_png"/>
     
-    <!-- TTS for fallback -->
-    <load module="mod_flite"/>
-    
     <!-- Codecs -->
     <load module="mod_g711"/>
     <load module="mod_opus"/>
