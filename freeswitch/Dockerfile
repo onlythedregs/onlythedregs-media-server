@@ -23,7 +23,7 @@ RUN apt-get install -y \
     uuid-dev libpq-dev libopus-dev libsndfile1-dev \
     libavformat-dev libavcodec-dev libavutil-dev libswscale-dev \
     libjpeg-dev libtiff-dev libedit-dev liblua5.3-dev \
-    libswresample-dev libvpx-dev libavresample-dev \
+    libswresample-dev libvpx-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Build sofia-sip from source (Debian/Ubuntu packages often too old)
@@ -106,16 +106,5 @@ EXPOSE 5060/udp
 EXPOSE 5060/tcp
 
 CMD ["freeswitch", "-nonat", "-nc"]
-
-# Copy configuration files
-COPY sip_profiles/ /etc/freeswitch/sip_profiles/
-COPY dialplan/ /etc/freeswitch/dialplan/
-COPY autoload_configs/ /etc/freeswitch/autoload_configs/
-
-# Create videos directory
-RUN mkdir -p /videos
-
-EXPOSE 5060/udp
-EXPOSE 5060/tcp
 
 CMD ["freeswitch", "-nonat", "-nc"]
