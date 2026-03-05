@@ -33,15 +33,6 @@ RUN git clone https://github.com/freeswitch/sofia-sip.git /usr/src/sofia-sip \
     && make -j$(nproc) \
     && make install
 
-# Build spandsp from source - pin to commit compatible with FreeSWITCH 1.10.x
-RUN git clone https://github.com/freeswitch/spandsp.git /usr/src/spandsp \
-    && cd /usr/src/spandsp \
-    && git checkout 67d2455afa587a201169c1085e0a5fa5ad83c962 \
-    && ./bootstrap.sh \
-    && ./configure --prefix=/usr/local \
-    && make -j$(nproc) \
-    && make install
-
 # Build libks from source (required by mod_verto in FreeSWITCH 1.10.x)
 RUN git clone https://github.com/signalwire/libks.git /usr/src/libks \
     && cd /usr/src/libks \
@@ -73,6 +64,7 @@ RUN sed -i \
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
     --with-openssl \
+    --without-spandsp \
     --disable-debug
 
 RUN make -j$(nproc) > /tmp/make.log 2>&1 \
@@ -108,7 +100,6 @@ RUN apt-get update && apt-get install -y \
 # Copy FreeSWITCH and its dependencies from builder
 COPY --from=builder /usr/local/freeswitch /usr/local/freeswitch
 COPY --from=builder /usr/local/lib/libsofia* /usr/local/lib/
-COPY --from=builder /usr/local/lib/libspandsp* /usr/local/lib/
 COPY --from=builder /usr/local/lib/libks* /usr/local/lib/
 
 RUN ldconfig
