@@ -22,9 +22,7 @@ RUN apt-get install -y \
     libpcre3-dev \
     libspeex-dev libspeexdsp-dev libldns-dev \
     uuid-dev libpq-dev libopus-dev libsndfile1-dev \
-    libavformat-dev libavcodec-dev libavutil-dev libswscale-dev \
     libjpeg-dev libtiff-dev libpng-dev libedit-dev liblua5.3-dev \
-    libswresample-dev libvpx-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Build sofia-sip from source (Debian/Ubuntu packages often too old)
@@ -35,9 +33,10 @@ RUN git clone https://github.com/freeswitch/sofia-sip.git /usr/src/sofia-sip \
     && make -j$(nproc) \
     && make install
 
-# Build spandsp from source
+# Build spandsp from source - pin to commit compatible with FreeSWITCH 1.10.x
 RUN git clone https://github.com/freeswitch/spandsp.git /usr/src/spandsp \
     && cd /usr/src/spandsp \
+    && git checkout 67d2455afa587a201169c1085e0a5fa5ad83c962 \
     && ./bootstrap.sh \
     && ./configure --prefix=/usr/local \
     && make -j$(nproc) \
@@ -61,9 +60,15 @@ WORKDIR /usr/src/freeswitch
 RUN which libtool && libtool --version
 RUN ./bootstrap.sh 2>&1 | tee /tmp/bootstrap.log || (echo "=== BOOTSTRAP LOG ===" && cat /tmp/bootstrap.log && exit 1)
 
-# Disable modules we don't need / don't have deps for
-RUN sed -i 's|^applications/mod_signalwire|#applications/mod_signalwire|' modules.conf \
-    && grep -E 'signalwire|flite|soundtouch|mongo|memcache' modules.conf || true
+# Disable modules we don't need / have missing/broken deps for
+RUN sed -i \
+    -e 's|^applications/mod_signalwire|#applications/mod_signalwire|' \
+    -e 's|^applications/mod_spandsp|#applications/mod_spandsp|' \
+    -e 's|^applications/mod_av|#applications/mod_av|' \
+    -e 's|^codecs/mod_h264|#codecs/mod_h264|' \
+    -e 's|^codecs/mod_vp8|#codecs/mod_vp8|' \
+    -e 's|^formats/mod_png|#formats/mod_png|' \
+    modules.conf
 
 RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig CFLAGS="-O2" ./configure \
     --prefix=/usr/local/freeswitch \
@@ -95,11 +100,6 @@ RUN apt-get update && apt-get install -y \
     libtiff5 \
     uuid-runtime \
     gettext-base \
-    libavformat58 \
-    libavcodec58 \
-    libavutil56 \
-    libswscale5 \
-    libvpx7 \
     libspeex1 \
     libspeexdsp1 \
     libpng16-16 \
