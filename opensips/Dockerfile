@@ -1,20 +1,29 @@
-# Build from Debian base - opensips/opensips:3.4 is AMD64-only
+# Mirror official docker-opensips Dockerfile (debian:bullseye base)
+# opensips/opensips:3.4 is AMD64-only; this approach supports ARM64
 FROM debian:bullseye-slim
 
+LABEL maintainer="onlythedregs"
+
+USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
-    gnupg2 wget ca-certificates gettext-base \
+ARG OPENSIPS_VERSION=3.4
+ARG OPENSIPS_BUILD=releases
+
+RUN apt-get -y update -qq && apt-get -y install \
+    gnupg2 ca-certificates gettext-base wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Add official OpenSIPS repo (has ARM64 packages)
-RUN wget -O /etc/apt/trusted.gpg.d/opensips.gpg \
-        https://apt.opensips.org/opensips-org.gpg \
-    && echo "deb https://apt.opensips.org bullseye 3.4-releases" \
+# Add OpenSIPS apt repo (same method as official docker-opensips)
+RUN apt-key adv --fetch-keys https://apt.opensips.org/pubkey.gpg \
+    && echo "deb https://apt.opensips.org bullseye ${OPENSIPS_VERSION}-${OPENSIPS_BUILD}" \
         > /etc/apt/sources.list.d/opensips.list \
-    && apt-get update \
-    && apt-cache search opensips | sort \
-    && apt-get install -y opensips \
+    && apt-get -y update -qq \
+    && apt-get -y install \
+        opensips \
+        opensips-tls-module \
+        opensips-wss-module \
+        opensips-rtpengine-module \
     && rm -rf /var/lib/apt/lists/*
 
 COPY opensips.cfg /etc/opensips/opensips.cfg
