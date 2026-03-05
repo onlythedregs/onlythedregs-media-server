@@ -70,7 +70,9 @@ RUN PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig:/usr/lib
     --with-openssl \
     --disable-debug
 
-RUN make -j$(nproc) && make install
+RUN make -j$(nproc) > /tmp/make.log 2>&1 \
+    || (echo "=== MAKE FAILED ===" && tail -80 /tmp/make.log && exit 1)
+RUN make install
 
 # ---
 
