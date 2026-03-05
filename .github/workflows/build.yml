@@ -76,3 +76,5 @@ jobs:
         no-cache: ${{ matrix.service == 'freeswitch' }}
         build-args: |
           BUILDKIT_INLINE_CACHE=1
+        secrets: |
+          sw_token=${{ secrets.SIGNALWIRE_TOKEN }}
