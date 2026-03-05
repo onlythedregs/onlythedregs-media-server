@@ -20,8 +20,14 @@
     <load module="mod_sndfile"/>
     <load module="mod_tone_stream"/>
     
+    <!-- Video Support -->
+    <load module="mod_av"/>
+    <load module="mod_png"/>
+
     <!-- Codecs -->
     <load module="mod_g711"/>
     <load module="mod_opus"/>
+    <load module="mod_vp8"/>
+    <load module="mod_h264"/>
   </modules>
 </configuration>
