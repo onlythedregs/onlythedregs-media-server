@@ -1,17 +1,28 @@
-# OpenSIPS using official Docker image
-FROM opensips/opensips:3.4
+# Build from Debian base - opensips/opensips:3.4 is AMD64-only
+FROM debian:bullseye-slim
 
-# Install gettext for environment variable substitution
-USER root
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
-    gettext-base \
+    gnupg2 wget ca-certificates gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy configuration
+# Add official OpenSIPS repo (has ARM64 packages)
+RUN wget -O /etc/apt/trusted.gpg.d/opensips.gpg \
+        https://apt.opensips.org/opensips-org.gpg \
+    && echo "deb https://apt.opensips.org bullseye 3.4-releases" \
+        > /etc/apt/sources.list.d/opensips.list \
+    && apt-get update \
+    && apt-get install -y \
+        opensips \
+        opensips-tls-module \
+        opensips-http-modules \
+        opensips-websocket-module \
+        opensips-sqlite-module \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY opensips.cfg /etc/opensips/opensips.cfg
 COPY entrypoint.sh /entrypoint.sh
-
-# Fix Windows CRLF line endings that break the shebang
 RUN sed -i 's/\r//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 443/tcp 5060/udp
