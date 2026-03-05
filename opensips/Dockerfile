@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
 COPY opensips.cfg /etc/opensips/opensips.cfg
 COPY entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
+# Fix Windows CRLF line endings that break the shebang
+RUN sed -i 's/\r//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 443/tcp 5060/udp
 

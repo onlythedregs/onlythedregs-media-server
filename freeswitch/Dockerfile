@@ -31,4 +31,4 @@ RUN mkdir -p /videos
 EXPOSE 5060/udp
 EXPOSE 5060/tcp
 
-CMD ["freeswitch", "-nonat", "-nc"]
+CMD ["freeswitch", "-nonat", "-nf"]
