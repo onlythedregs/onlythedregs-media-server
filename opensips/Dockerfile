@@ -13,12 +13,8 @@ RUN wget -O /etc/apt/trusted.gpg.d/opensips.gpg \
     && echo "deb https://apt.opensips.org bullseye 3.4-releases" \
         > /etc/apt/sources.list.d/opensips.list \
     && apt-get update \
-    && apt-get install -y \
-        opensips \
-        opensips-tls-module \
-        opensips-http-modules \
-        opensips-websocket-module \
-        opensips-sqlite-module \
+    && apt-cache search opensips | sort \
+    && apt-get install -y opensips \
     && rm -rf /var/lib/apt/lists/*
 
 COPY opensips.cfg /etc/opensips/opensips.cfg
