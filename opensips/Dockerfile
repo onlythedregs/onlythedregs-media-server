@@ -19,10 +19,7 @@ RUN apt-key adv --fetch-keys https://apt.opensips.org/pubkey.gpg \
     && echo "deb https://apt.opensips.org bookworm ${OPENSIPS_VERSION}-${OPENSIPS_BUILD}" \
         > /etc/apt/sources.list.d/opensips.list \
     && apt-get -y update -qq \
-    && apt-get -y install \
-        opensips \
-        opensips-tls-module \
-        opensips-wss-module \
+    && apt-get -y install opensips \
     && apt-cache search opensips | sort \
     && rm -rf /var/lib/apt/lists/*
 
