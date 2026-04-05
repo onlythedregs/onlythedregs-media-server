@@ -1,16 +1,16 @@
 version: '3.8'
 
 services:
-  opensips:
-    image: ghcr.io/onlythedregs/onlythedregs-media-server/opensips:latest
-    build: ./opensips
-    container_name: opensips
+  kamailio:
+    image: ghcr.io/onlythedregs/onlythedregs-media-server/kamailio:latest
+    build: ./kamailio
+    container_name: kamailio
     restart: unless-stopped
     ports:
       - "443:443"      # WSS for WebRTC clients
       - "5060:5060/udp" # SIP (for debugging)
     volumes:
-      - ./certs:/etc/opensips/tls:ro
+      - ./certs:/etc/kamailio/tls:ro
     environment:
       - PUBLIC_IP=${PUBLIC_IP}
       - PUBLIC_DOMAIN=${PUBLIC_DOMAIN}

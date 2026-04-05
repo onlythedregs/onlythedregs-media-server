@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'opensips/**'
+      - 'kamailio/**'
       - 'rtpengine/**'
       - 'freeswitch/**'
       - 'docker-compose*.yml'
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'opensips/**'
+      - 'kamailio/**'
       - 'rtpengine/**'
       - 'freeswitch/**'
       - 'docker-compose*.yml'
@@ -31,7 +31,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [opensips, rtpengine, freeswitch]
+        service: [kamailio, rtpengine, freeswitch]
 
     steps:
     - name: Checkout repository
@@ -63,7 +63,7 @@ jobs:
           org.opencontainers.image.title=${{ matrix.service }}
           org.opencontainers.image.description=OnlyTheDregs Media Server - ${{ matrix.service }}
 
-    - name: Build and push Docker image (opensips, rtpengine)
+    - name: Build and push Docker image (kamailio, rtpengine)
       if: matrix.service != 'freeswitch'
       uses: docker/build-push-action@v6
       with:
